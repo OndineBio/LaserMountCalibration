@@ -4,14 +4,9 @@ import Autocomplete, {
   createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
 import {
-  Box,
   Button,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  IconButton,
-  Radio,
-  RadioGroup,
+  FormControl, FormControlLabel,
+  FormLabel, Radio, RadioGroup,
   Step,
   StepLabel,
   Stepper,
