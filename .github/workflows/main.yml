@@ -1,6 +1,17 @@
 name: Build and Deploy
 on: [push]
 jobs:
+  pretty:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # Make sure the actual branch is checked out when running on pull requests
+          ref: ${{ github.head_ref }}
+      - name: Prettify code
+        uses: creyD/prettier_action@v2.2
+  
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
@@ -20,13 +31,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
           FOLDER: build # The folder the action should deploy
-  pretty:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          # Make sure the actual branch is checked out when running on pull requests
-          ref: ${{ github.head_ref }}
-      - name: Prettify code
-        uses: creyD/prettier_action@v2.2
+
