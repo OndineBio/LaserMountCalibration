@@ -2,6 +2,7 @@
   "name": "create-react-app-with-typescript",
   "version": "4.0.0",
   "private": true,
+  "homepage": "https://ondinebio.github.io/LaserMountCalibration/",
   "dependencies": {
     "@material-ui/core": "latest",
     "@material-ui/icons": "^4.9.1",
@@ -11,6 +12,7 @@
     "react": "latest",
     "react-dom": "latest",
     "react-scripts": "latest",
+    "socket.io-client": "^2.3.0",
     "typescript": "latest"
   },
   "scripts": {
@@ -30,5 +32,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/socket.io-client": "^1.4.33"
   }
 }

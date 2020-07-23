@@ -10,7 +10,7 @@ export default function App() {
           <Typography variant="h6">Laser Mount Calibration</Typography>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="sm">
+      <Container maxWidth="md">
         <Box my={4}>
           <CalibrationSteps />
         </Box>
