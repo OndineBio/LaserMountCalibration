@@ -497,7 +497,7 @@ export function CalibrationSteps() {
     })
   })
   const openSocket = async (ip: string) => {
-    const temp_socket = io(ip + ":" + PORT, {
+    const temp_socket = io("http://" + ip + ":" + PORT, {
       autoConnect: false,
       timeout: 40000,
       rejectUnauthorized: false,
