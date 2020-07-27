@@ -1,349 +1,15 @@
-import React, {FC, useState, Fragment, useEffect, useCallback} from "react";
-import {makeStyles, Theme, createStyles} from "@material-ui/core/styles";
+import React, {Fragment, useCallback, useEffect, useState} from "react";
+import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import io from "socket.io-client";
-import Autocomplete, {
-  createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
-import {
-  Button,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Step,
-  StepLabel,
-  Stepper,
-  TextField,
-  Typography,
-} from "@material-ui/core";
+import {Button, Step, StepLabel, Stepper, Typography,} from "@material-ui/core";
 import {LoaderBackdrop} from "./LoaderBackdrop";
-import {
-  ArrowBack,
-  ArrowDownward,
-  ArrowForward,
-  ArrowUpward,
-} from "@material-ui/icons";
+import {CalibrateToPlate, Direction, Distance, WellName} from "./Steps/CalibrateToPlate";
+import {ConnectToDevice} from "./Steps/ConnectToDevice";
+import {LocatePuck} from "./Steps/LocatePuck";
+import {AdjustTo100mw} from "./Steps/AdjustTo100mw";
 
 const DEBUG = false; // display offset and position info for debugging
 type Socket = SocketIOClient.Socket;
-
-const useCalibrateToPlateStyles = makeStyles({
-  title: {
-    textAlign: "center",
-  },
-  keyContainer: {
-    display: "grid",
-    gridTemplateColumns: "repeat(5,1fr)",
-    gridTemplateTows: " repeat(3,1fr)",
-    gridTemplateAreas: `". toBack . . up "\n"left . right . ."\n". toFront . . down"`,
-    maxWidth: "350px",
-  },
-  buttonToBack: {gridArea: "toBack", width: "inherit"},
-  buttonToFront: {gridArea: "toFront", width: "inherit"},
-  buttonUp: {gridArea: "up", width: "inherit"},
-  buttonDown: {gridArea: "down", width: "inherit"},
-  buttonLeft: {gridArea: "left", width: "inherit"},
-  buttonRight: {gridArea: "right", width: "inherit"},
-  controlGroup: {
-    margin: "32px auto",
-    display: "flex",
-    justifyContent: "space-around",
-  },
-  centerButtonDiv: {
-    display: "grid",
-    placeItems: "center",
-  },
-});
-
-enum WellName {
-  A1 = "A1",
-  A12 = "A12",
-  H12 = "H12",
-}
-
-enum Distance {
-  MM0_1 = 0.1,
-  MM1 = 1,
-  MM10 = 10,
-}
-
-enum Direction {
-  toBack,
-  toFront,
-  up,
-  down,
-  left,
-  right
-}
-
-const CalibrateToPlate: FC<{
-  onDone: () => void;
-  onInit: () => void
-  wellName: WellName,
-  move: (direction: Direction, distance: Distance) => Promise<void>;
-}> = ({
-        onDone,
-        onInit,
-        wellName,
-        move
-      }) => {
-  const classes = useCalibrateToPlateStyles();
-  const [moveDistance, setMoveDistance] = useState<Distance>(Distance.MM0_1);
-  const [ranForWell, setRanForWell] = useState<WellName | null>(null)
-  useEffect(() => {
-    if (ranForWell !== wellName) {
-      setRanForWell(wellName) // make sure init is only ran once for each well
-      onInit()
-    }
-  }, [onInit, ranForWell, wellName])
-  useEffect(() => {
-    const keydownFunc = async (event: KeyboardEvent) => {
-      if (event.shiftKey) {
-        switch (event.key) {
-          case "ArrowUp":
-            await move(Direction.up, moveDistance)
-            break;
-          case "ArrowDown":
-            await move(Direction.down, moveDistance)
-            break;
-        }
-      } else {
-        switch (event.key) {
-          case "ArrowUp":
-            await move(Direction.toBack, moveDistance)
-            break;
-          case "ArrowDown":
-            await move(Direction.toFront, moveDistance)
-            break;
-          case "ArrowLeft":
-            await move(Direction.left, moveDistance)
-            break;
-          case "ArrowRight":
-            await move(Direction.right, moveDistance)
-            break;
-
-        }
-
-      }
-    }
-    document.addEventListener("keydown", keydownFunc, false)
-
-    return () => {
-      document.removeEventListener("keydown", keydownFunc, false)
-    }
-  }, [moveDistance, move])
-
-  return (
-    <Fragment>
-      <Typography className={classes.title} variant="h4">
-        Calibrate to well {wellName}
-      </Typography>
-      <div className={classes.controlGroup}>
-        <FormControl component="fieldset">
-          <FormLabel component="legend">Movement Distance</FormLabel>
-          <RadioGroup
-            onKeyDown={(e) => {
-              e.preventDefault()
-            }}
-            aria-label="move-distance"
-            name="move-distance"
-            value={moveDistance}
-            onChange={(e) => {
-              setMoveDistance(Number(e.target.value) as Distance);
-            }}
-          >
-            <FormControlLabel
-              value={Distance.MM0_1}
-              control={<Radio/>}
-              label="0.1 mm"
-            />
-            <FormControlLabel
-              value={Distance.MM1}
-              control={<Radio/>}
-              label="1 mm"
-            />
-            <FormControlLabel
-              value={Distance.MM10}
-              control={<Radio/>}
-              label="10 mm"
-            />
-          </RadioGroup>
-        </FormControl>
-        <div className={classes.keyContainer}>
-          <Button onClick={async () => {
-            await move(Direction.up, moveDistance)
-          }} className={classes.buttonUp} variant="outlined">
-            <ArrowUpward/>
-          </Button>
-          <Button onClick={async () => {
-            await move(Direction.down, moveDistance)
-          }} className={classes.buttonDown} variant="outlined">
-            <ArrowDownward/>
-          </Button>
-          <Button onClick={async () => {
-            await move(Direction.toBack, moveDistance)
-          }} className={classes.buttonToBack} variant="outlined">
-            <ArrowUpward/>
-          </Button>
-          <Button onClick={async () => {
-            await move(Direction.toFront, moveDistance)
-          }} className={classes.buttonToFront} variant="outlined">
-            <ArrowDownward/>
-          </Button>
-          <Button onClick={async () => {
-            await move(Direction.left, moveDistance)
-          }} className={classes.buttonLeft} variant="outlined">
-            <ArrowBack/>
-          </Button>
-          <Button onClick={async () => {
-            await move(Direction.right, moveDistance)
-          }} className={classes.buttonRight} variant="outlined">
-            <ArrowForward/>
-          </Button>
-        </div>
-      </div>
-      <div className={classes.centerButtonDiv}>
-        <Button
-          onClick={() => {
-            onDone();
-          }}
-          color="primary"
-          size="large"
-          variant="outlined"
-        >
-          Next
-        </Button>
-      </div>
-    </Fragment>
-  );
-};
-
-const filter = createFilterOptions<string>();
-const ConnectToDeviceStep: FC<{
-  // socket: Socket | null,
-  openSocket: (ip: string) => Promise<void>;
-  onDone: () => void;
-  openLoader: () => void;
-  closeLoader: () => void;
-}> = ({onDone, openLoader, closeLoader, openSocket}) => {
-
-  const IP_ADDR_STORAGE_KEY = "ConnectToDeviceStep_ip_addresses";
-  const [ipAddress, setIpAddress] = useState<string>("");
-  const getSavedOptions = (): string[] => {
-    const ipAddressJson = localStorage.getItem(IP_ADDR_STORAGE_KEY);
-    let savedIpAddresses = [];
-    if (ipAddressJson) {
-      savedIpAddresses = JSON.parse(ipAddressJson);
-    }
-    return savedIpAddresses as string[];
-  };
-  const [ipAddressOptions, setIpAddressOptions] = useState<string[]>(
-    getSavedOptions()
-  );
-  const saveNewIpAddress = (ipAddr: string) => {
-    if (!ipAddressOptions.includes(ipAddr)) {
-      setIpAddressOptions((prev) => {
-        const updated = [ipAddr, ...prev];
-        localStorage.setItem(IP_ADDR_STORAGE_KEY, JSON.stringify(updated));
-        return updated;
-      });
-    }
-  };
-  const [invalidIp, setInvalidIp] = useState(false);
-  const isValidIp = (ipAddr: string): boolean =>
-    /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(ipAddr);
-
-  return (
-    <Fragment>
-      <Autocomplete
-        id="combo-box-demo"
-        options={ipAddressOptions}
-        noOptionsText={"Invalid IP address"}
-        value={ipAddress === "" ? null : ipAddress}
-        style={{width: 300}}
-        onClose={() => {
-          if (isValidIp(ipAddress) || ipAddress === "") {
-            setInvalidIp(false);
-          } else {
-            setInvalidIp(true);
-          }
-        }}
-        onChange={(event, newValue) => {
-
-          if (typeof newValue === "string") {
-            if (newValue.includes("Add")) {
-              setIpAddress(newValue.replace(/Add "(.+)"/, "$1"));
-              setInvalidIp(false);
-              saveNewIpAddress(newValue.replace(/Add "(.+)"/, "$1"));
-            } else {
-              setIpAddress(newValue);
-            }
-          }
-          // } else (newValue) {
-          //   // Create a new value from the user input
-          //   setIpAddress(newValue);
-          // }
-        }}
-        filterOptions={(options, params) => {
-          const filtered = filter(options, params);
-          // Suggest the creation of a new value
-          if (params.inputValue !== "") {
-            if (isValidIp(params.inputValue)) {
-              filtered.push(`Add "${params.inputValue}"`);
-            }
-          }
-          return filtered;
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            error={invalidIp}
-            onChange={(e) => {
-              if (isValidIp(e.target.value) && e.target.value !== "") {
-                setInvalidIp(false);
-              } else {
-                setInvalidIp(true);
-              }
-            }}
-            helperText={invalidIp && "Invalid IP address"}
-            label="Robot IP Address"
-            variant="outlined"
-          />
-        )}
-      />
-      <br/>
-      <Button
-        disabled={!isValidIp(ipAddress)}
-        onClick={async () => {
-          openLoader();
-          await openSocket(ipAddress)
-          closeLoader();
-          onDone();
-        }}
-        variant="outlined"
-        color="primary"
-      >
-        Connect
-      </Button>
-    </Fragment>
-  );
-};
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: "100%",
-    },
-    button: {
-      marginRight: theme.spacing(1),
-    },
-    instructions: {
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-    },
-  })
-);
 
 interface PositionLike {
   readonly x: number;
@@ -395,6 +61,21 @@ class Position implements PositionLike {
 const PORT = 5000
 
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      width: "100%",
+    },
+    button: {
+      marginRight: theme.spacing(1),
+    },
+    instructions: {
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+    },
+  })
+);
+
 export function CalibrationSteps() {
   const [socket, setSocket] = useState<Socket | null>(null)
   const classes = useStyles();
@@ -404,7 +85,8 @@ export function CalibrationSteps() {
   const [currentPosition, setCurrentPosition] = useState<Position>()
   const [currentWellTop, setCurrentWellTop] = useState<Position>()
   const [zAbsMin, setZAbsMin] = useState<number>()
-
+  const [laser100mwDistance, setLaser100mwDistance] = useState<number>()
+  const [puckPosition, setPuckPosition] = useState<Position>()
   // handle socket cleanup
   useEffect(() => {
     return () => {
@@ -524,9 +206,10 @@ export function CalibrationSteps() {
     console.info("Connected socket!")
     console.info("initializing robot...")
     await new Promise((res => {
-      temp_socket?.emit("init", ({zAbsMin}: { zAbsMin: number }) => {
-        console.log("zAbsMin", zAbsMin)
+      temp_socket?.emit("init", ({zAbsMin, laser100mwDistance}: { zAbsMin: number, laser100mwDistance: number }) => {
+        console.log("zAbsMin", zAbsMin, "laser100mwDistance", laser100mwDistance)
         setZAbsMin(zAbsMin)
+        setLaser100mwDistance(laser100mwDistance)
         res()
       })
     }))
@@ -571,17 +254,32 @@ export function CalibrationSteps() {
   }, [socket, moveToPos, updateOffset])
   const onInit3 = useCallback(async () => {
     openLoader()
-    if (socket) {
-      await updateOffset()
-      await moveToPos(3)
-      closeLoader()
-    } else {
-      throw Error("socket is null")
-    }
+    if (!socket) throw Error("socket is null")
+
+    await updateOffset()
+    await moveToPos(3)
+    closeLoader()
+
   }, [socket, moveToPos, updateOffset])
+  const saveLaserCalibration = useCallback(async () => {
+    if (!socket) throw Error("socket is null")
+    if (!puckPosition) throw Error("puckPosition is undefined")
+    if (!currentPosition) throw Error("currentPosition is undefined")
+
+    const newCalibration = currentPosition.z - puckPosition.z;
+
+    await new Promise<void>(res => {
+      socket.emit("saveLaserDistCalibration", {newCalibration}, () => {
+        res()
+      })
+    })
+
+
+  }, [socket, currentPosition, puckPosition])
+
 
   const steps = [
-    <ConnectToDeviceStep
+    <ConnectToDevice
       onDone={() => {
         handleNext()
       }}
@@ -608,16 +306,41 @@ export function CalibrationSteps() {
       handleNext()
     }} wellName={WellName.H12}
     />,
-    <Button onClick={async () => {
-      if (offset !== undefined) {
-        openLoader()
-        await saveCalibration(offset)
-        closeLoader()
-        handleNext()
-      } else {
-        console.error(Error("offset not set!"))
-      }
-    }}>Save Calibration</Button>,
+    <Fragment>
+      <Button onClick={async () => {
+        if (offset !== undefined) {
+          openLoader()
+          await saveCalibration(offset)
+          closeLoader()
+          setActiveStep(8);
+        } else {
+          console.error(Error("offset not set!"))
+        }
+      }}>Save Calibration and End</Button>
+      <Button onClick={async () => {
+        if (offset !== undefined) {
+          openLoader()
+          await saveCalibration(offset)
+          closeLoader()
+          handleNext()
+        } else {
+          console.error(Error("offset not set!"))
+        }
+      }}>Save Calibration and Calibrate laser height</Button>
+    </Fragment>,
+    <LocatePuck onDone={async () => {
+      if (laser100mwDistance === undefined) throw new Error("laser100mwDistance undefined")
+      setPuckPosition(currentPosition)
+      await move(Direction.up, laser100mwDistance)
+      handleNext()
+    }} move={move} onInit={() => {
+    }}/>,
+    <AdjustTo100mw onDone={async () => {
+      await saveLaserCalibration()
+      handleNext()
+    }} move={move} onInit={() => {
+    }}/>,
+
   ]
 
 
@@ -646,7 +369,7 @@ export function CalibrationSteps() {
         </Step>
       </Stepper>
       <div>
-        {activeStep === 5 ? (
+        {activeStep === 7 ? (
           <div>
             <Typography className={classes.instructions}>
               All steps completed - you&apos;re finished
