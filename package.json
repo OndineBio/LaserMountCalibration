@@ -1,14 +1,16 @@
 {
-  "name": "create-react-app-with-typescript",
+  "name": "laser-mount-calibration",
   "version": "4.0.0",
   "private": true,
-  "homepage": "https://ondinebio.github.io/LaserMountCalibration/",
+  "main": "public/electron.js",
+  "homepage": "./",
   "dependencies": {
     "@material-ui/core": "latest",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "electron-is-dev": "^1.2.0",
     "react": "latest",
     "react-dom": "latest",
     "react-scripts": "latest",
@@ -16,10 +18,14 @@
     "typescript": "latest"
   },
   "scripts": {
+    "dist": "electron-builder -mwl",
+    "preelectron-pack": "yarn build",
+    "pack": "electron-builder --dir",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron-dev": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "browserslist": {
     "production": [
@@ -33,7 +39,21 @@
       "last 1 safari version"
     ]
   },
+  "build": {
+    "appId": "com.example.electron-cra",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
   "devDependencies": {
-    "@types/socket.io-client": "^1.4.33"
+    "@types/socket.io-client": "^1.4.33",
+    "concurrently": "^5.2.0",
+    "electron": "^9.1.1",
+    "electron-builder": "^22.7.0",
+    "wait-on": "^5.1.0"
   }
 }
