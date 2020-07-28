@@ -9,9 +9,9 @@ const useCalibrateToPlateStyles = makeStyles({
   },
   keyContainer: {
     display: "grid",
-    gridTemplateColumns: "repeat(3,1fr)",
-    gridTemplateTows: " repeat(3,1fr)",
-    gridTemplateAreas: `". up ."\n"..."\n".down."`,
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateTows: " repeat(3, 1fr)",
+    gridTemplateAreas: `". up ."\n". . ."\n". down ."`,
     maxWidth: "150px",
   },
   buttonUp: {gridArea: "up", width: "inherit"},
