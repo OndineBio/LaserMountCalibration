@@ -1,2 +1,2 @@
 # Laser Mount calibration
-this is a webapp to calibrate the opentrons laser mount
+this is a electron app to calibrate the opentrons laser mount
