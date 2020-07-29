@@ -367,6 +367,12 @@ export function CalibrationSteps() {
         <Step>
           <StepLabel>Save Calibration</StepLabel>
         </Step>
+        <Step>
+          <StepLabel>Locate ILX Sensor</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Find correct power</StepLabel>
+        </Step>
       </Stepper>
       <div>
         {activeStep === 7 ? (
