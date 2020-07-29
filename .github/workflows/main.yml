@@ -17,7 +17,7 @@ jobs:
         run: |
             npm install
             npm run build
-            npm electron-builder -mw
+            npx electron-builder -mw
             mkdir out
             cp dist/laser-mount-calibration-*.dmg out
             cp dist/laser-mount-calibration-*.exe out
