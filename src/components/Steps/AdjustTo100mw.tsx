@@ -1,7 +1,7 @@
 import {makeStyles} from "@material-ui/core/styles";
 import React, {FC, Fragment, useEffect, useState} from "react";
 import {Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Typography} from "@material-ui/core";
-import {ArrowBack, ArrowDownward, ArrowForward, ArrowUpward} from "@material-ui/icons";
+import {ArrowDownward, ArrowUpward} from "@material-ui/icons";
 
 
 const useCalibrateToPlateStyles = makeStyles({

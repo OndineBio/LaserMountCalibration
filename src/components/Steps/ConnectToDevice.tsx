@@ -1,7 +1,6 @@
 import Autocomplete, {createFilterOptions} from "@material-ui/lab/Autocomplete";
 import React, {FC, Fragment, useState} from "react";
 import {Button, TextField} from "@material-ui/core";
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 
 const filter = createFilterOptions<string>();
 export const ConnectToDevice: FC<{
