@@ -40,7 +40,8 @@
     ]
   },
   "build": {
-    "appId": "com.example.electron-cra",
+    "appId": "com.ondinebio.laser-mount-cal",
+    "productName": "Laser Mount Calibration",
     "files": [
       "build/**/*",
       "node_modules/**/*"
